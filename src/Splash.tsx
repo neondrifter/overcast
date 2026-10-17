@@ -1,10 +1,5 @@
 import {forwardRef, useCallback, useEffect, useState} from 'react'
-import {
-  AccessibilityInfo,
-  Image as RNImage,
-  useColorScheme,
-  View,
-} from 'react-native'
+import {AccessibilityInfo, useColorScheme, View} from 'react-native'
 import Animated, {
   Easing,
   interpolate,
@@ -15,20 +10,10 @@ import Animated, {
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import Svg, {Path, type SvgProps} from 'react-native-svg'
 import {scheduleOnRN} from 'react-native-worklets'
-import {Image} from 'expo-image'
 import * as SplashScreen from 'expo-splash-screen'
 
 import {Logotype} from '#/view/icons/Logotype'
 import {atoms as a} from '#/alf'
-// @ts-expect-error
-import splashImagePointer from '../assets/splash/splash.png'
-// @ts-expect-error
-import darkSplashImagePointer from '../assets/splash/splash-dark.png'
-
-const splashImageUri = RNImage.resolveAssetSource(splashImagePointer)!.uri
-const darkSplashImageUri = RNImage.resolveAssetSource(
-  darkSplashImagePointer,
-)!.uri
 
 export const Logo = forwardRef(function LogoImpl(props: SvgProps, ref) {
   const width = 1000
@@ -42,7 +27,19 @@ export const Logo = forwardRef(function LogoImpl(props: SvgProps, ref) {
       style={[{width, height}, props.style]}>
       <Path
         fill={props.fill || '#fff'}
-        d="M13.873 3.77C21.21 9.243 29.103 20.342 32 26.3v15.732c0-.335-.13.043-.41.858-1.512 4.414-7.418 21.642-20.923 7.87-7.111-7.252-3.819-14.503 9.125-16.692-7.405 1.252-15.73-.817-18.014-8.93C1.12 22.804 0 8.431 0 6.488 0-3.237 8.579-.18 13.873 3.77ZM50.127 3.77C42.79 9.243 34.897 20.342 32 26.3v15.732c0-.335.13.043.41.858 1.512 4.414 7.418 21.642 20.923 7.87 7.111-7.252 3.819-14.503-9.125-16.692 7.405 1.252 15.73-.817 18.014-8.93C62.88 22.804 64 8.431 64 6.488 64-3.237 55.422-.18 50.127 3.77Z"
+        fillOpacity={0.55}
+        d="M33.5 13.2C35.8 9.9 39.7 7.8 44.1 7.8C50.5 7.8 55.9 12.4 57.1 18.5C61.0 19.6 63.8 23.2 63.8 27.5C63.8 31.6 61.2 35.1 57.5 36.3C56.1 29.3 50.8 23.9 43.9 23.2C41.8 18.5 38.1 14.9 33.5 13.2Z"
+      />
+      <Path
+        fill={props.fill || '#fff'}
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M13.5 49C6.6 49 1 43.4 1 36.5C1 30.4 5.4 25.3 11.2 24.2C13.2 16.5 20.2 10.8 28.6 10.8C37.5 10.8 45.0 17.1 46.6 25.5C47.5 25.3 48.5 25.2 49.5 25.2C56.4 25.2 62 30.8 62 37.7C62 44.0 57.3 49 51 49H13.5ZM10.5 38.8C16.5 38.8 21.2 34.6 27.8 34.6C34.4 34.6 39.2 38.8 45.8 38.8H52.5C53.5 38.8 54.3 39.6 54.3 40.6C54.3 41.6 53.5 42.4 52.5 42.4H45.8C38.2 42.4 33.4 38.2 27.8 38.2C22.2 38.2 17.5 42.4 10.5 42.4C9.5 42.4 8.7 41.6 8.7 40.6C8.7 39.6 9.5 38.8 10.5 38.8Z"
+      />
+      <Path
+        fill={props.fill || '#fff'}
+        fillOpacity={0.7}
+        d="M15 53.8H36.5C37.6 53.8 38.5 54.7 38.5 55.8C38.5 56.9 37.6 57.8 36.5 57.8H15C13.9 57.8 13 56.9 13 55.8C13 54.7 13.9 53.8 15 53.8ZM43.5 53.8H50C51.1 53.8 52 54.7 52 55.8C52 56.9 51.1 57.8 50 57.8H43.5C42.4 57.8 41.5 56.9 41.5 55.8C41.5 54.7 42.4 53.8 43.5 53.8Z"
       />
     </Svg>
   )
@@ -60,14 +57,9 @@ export function Splash(props: React.PropsWithChildren<Props>) {
   const outroApp = useSharedValue(0)
   const outroSplashOpacity = useSharedValue(0)
   const [isAnimationComplete, setIsAnimationComplete] = useState(false)
-  const [isImageLoaded, setIsImageLoaded] = useState(false)
   const [isLayoutReady, setIsLayoutReady] = useState(false)
   const [reduceMotion, setReduceMotion] = useState<boolean | undefined>(false)
-  const isReady =
-    props.isReady &&
-    isImageLoaded &&
-    isLayoutReady &&
-    reduceMotion !== undefined
+  const isReady = props.isReady && isLayoutReady && reduceMotion !== undefined
 
   const colorScheme = useColorScheme()
   const isDarkMode = colorScheme === 'dark'
@@ -128,7 +120,6 @@ export function Splash(props: React.PropsWithChildren<Props>) {
 
   const onFinish = useCallback(() => setIsAnimationComplete(true), [])
   const onLayout = useCallback(() => setIsLayoutReady(true), [])
-  const onLoadEnd = useCallback(() => setIsImageLoaded(true), [])
 
   useEffect(() => {
     if (isReady) {
@@ -171,11 +162,11 @@ export function Splash(props: React.PropsWithChildren<Props>) {
   }, [onFinish, intro, outroLogo, outroApp, outroSplashOpacity, isReady])
 
   useEffect(() => {
-    AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion)
+    void AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion)
   }, [])
 
   // special off-spec color for dark mode
-  const logoBg = isDarkMode ? '#0F1824' : '#fff'
+  const logoBg = isDarkMode ? '#14181F' : '#FAFBFC'
 
   return (
     <View style={{flex: 1}} onLayout={onLayout}>
@@ -190,17 +181,9 @@ export function Splash(props: React.PropsWithChildren<Props>) {
           style={[
             a.absolute,
             a.inset_0,
-            // The splash PNGs contain partially transparent pixels.
-            {backgroundColor: isDarkMode ? '#002861' : '#006AFF'},
+            {backgroundColor: isDarkMode ? '#152A42' : '#2B7AC9'},
             splashAnimation,
           ]}>
-          <Image
-            accessibilityIgnoresInvertColors
-            onLoadEnd={onLoadEnd}
-            source={{uri: isDarkMode ? darkSplashImageUri : splashImageUri}}
-            style={[a.absolute, a.inset_0]}
-          />
-
           <Animated.View
             style={[
               bottomLogoAnimation,

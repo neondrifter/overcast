@@ -9,6 +9,7 @@ import {UserAvatar} from '#/view/com/util/UserAvatar'
 import {atoms as a, useBreakpoints, useTheme} from '#/alf'
 import {Divider} from '#/components/Divider'
 import {Link} from '#/components/Link'
+import {OvercastMediaHider} from '#/components/Post/Embed/OvercastMediaHider'
 import {Text} from '#/components/Typography'
 import {IS_NATIVE} from '#/env'
 import {type app} from '#/lexicons'
@@ -91,13 +92,15 @@ export function AtCard({
             hovered || focused || pressed ? t.atoms.bg_contrast_25 : t.atoms.bg,
           ]}>
           {view.thumb && (
-            <Image
-              style={a.aspect_card}
-              source={{uri: view.thumb}}
-              accessibilityIgnoresInvertColors
-              loading="lazy"
-              useAppleWebpCodec
-            />
+            <OvercastMediaHider kind="thumbnail" rounded={false}>
+              <Image
+                style={a.aspect_card}
+                source={{uri: view.thumb}}
+                accessibilityIgnoresInvertColors
+                loading="lazy"
+                useAppleWebpCodec
+              />
+            </OvercastMediaHider>
           )}
           <View style={[a.p_md, a.gap_xs]}>
             <Text

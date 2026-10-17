@@ -1,10 +1,15 @@
-import {msg} from '@lingui/core/macro'
-import {useLingui} from '@lingui/react'
-import {Trans} from '@lingui/react/macro'
+import {Trans, useLingui} from '@lingui/react/macro'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 
 import {type CommonNavigatorParams} from '#/lib/routes/types'
-import {useAutoplayDisabled, useSetAutoplayDisabled} from '#/state/preferences'
+import {
+  useAutoplayDisabled,
+  useHideMediaEnabled,
+  useHideProfileMediaEnabled,
+  useSetAutoplayDisabled,
+  useSetHideMediaEnabled,
+  useSetHideProfileMediaEnabled,
+} from '#/state/preferences'
 import {
   useInAppBrowser,
   useSetInAppBrowser,
@@ -18,11 +23,13 @@ import * as SettingsList from '#/screens/Settings/components/SettingsList'
 import * as Toggle from '#/components/forms/Toggle'
 import {Bubbles_Stroke2_Corner2_Rounded as BubblesIcon} from '#/components/icons/Bubble'
 import {CircleInfo_Stroke2_Corner0_Rounded as CircleInfo} from '#/components/icons/CircleInfo'
+import {EyeSlash_Stroke2_Corner0_Rounded as EyeSlashIcon} from '#/components/icons/Eye'
 import {Hashtag_Stroke2_Corner0_Rounded as HashtagIcon} from '#/components/icons/Hashtag'
 import {Home_Stroke2_Corner2_Rounded as HomeIcon} from '#/components/icons/Home'
 import {Macintosh_Stroke2_Corner2_Rounded as MacintoshIcon} from '#/components/icons/Macintosh'
 import {Play_Stroke2_Corner2_Rounded as PlayIcon} from '#/components/icons/Play'
 import {Trending2_Stroke2_Corner2_Rounded as Graph} from '#/components/icons/Trending'
+import {UserCircle_Stroke2_Corner0_Rounded as UserCircleIcon} from '#/components/icons/UserCircle'
 import {Window_Stroke2_Corner2_Rounded as WindowIcon} from '#/components/icons/Window'
 import * as Layout from '#/components/Layout'
 import {useAnalytics} from '#/analytics'
@@ -33,10 +40,14 @@ type Props = NativeStackScreenProps<
   'ContentAndMediaSettings'
 >
 export function ContentAndMediaSettingsScreen({}: Props) {
-  const {_} = useLingui()
+  const {t: l} = useLingui()
   const ax = useAnalytics()
   const autoplayDisabledPref = useAutoplayDisabled()
   const setAutoplayDisabledPref = useSetAutoplayDisabled()
+  const hideMediaPref = useHideMediaEnabled()
+  const setHideMediaPref = useSetHideMediaEnabled()
+  const hideProfileMediaPref = useHideProfileMediaEnabled()
+  const setHideProfileMediaPref = useSetHideProfileMediaEnabled()
   const inAppBrowserPref = useInAppBrowser()
   const setUseInAppBrowser = useSetInAppBrowser()
   const {enabled: trendingEnabled} = useTrendingConfig()
@@ -59,7 +70,7 @@ export function ContentAndMediaSettingsScreen({}: Props) {
         <SettingsList.Container>
           <SettingsList.LinkItem
             to="/settings/saved-feeds"
-            label={_(msg`Manage saved feeds`)}>
+            label={l`Manage saved feeds`}>
             <SettingsList.ItemIcon icon={HashtagIcon} />
             <SettingsList.ItemText>
               <Trans>Manage saved feeds</Trans>
@@ -67,7 +78,7 @@ export function ContentAndMediaSettingsScreen({}: Props) {
           </SettingsList.LinkItem>
           <SettingsList.LinkItem
             to="/settings/threads"
-            label={_(msg`Thread preferences`)}>
+            label={l`Thread preferences`}>
             <SettingsList.ItemIcon icon={BubblesIcon} />
             <SettingsList.ItemText>
               <Trans>Thread preferences</Trans>
@@ -75,7 +86,7 @@ export function ContentAndMediaSettingsScreen({}: Props) {
           </SettingsList.LinkItem>
           <SettingsList.LinkItem
             to="/settings/following-feed"
-            label={_(msg`Following feed preferences`)}>
+            label={l`Following feed preferences`}>
             <SettingsList.ItemIcon icon={HomeIcon} />
             <SettingsList.ItemText>
               <Trans>Following feed preferences</Trans>
@@ -83,7 +94,7 @@ export function ContentAndMediaSettingsScreen({}: Props) {
           </SettingsList.LinkItem>
           <SettingsList.LinkItem
             to="/settings/external-embeds"
-            label={_(msg`External media`)}>
+            label={l`External media`}>
             <SettingsList.ItemIcon icon={MacintoshIcon} />
             <SettingsList.ItemText>
               <Trans>External media</Trans>
@@ -91,7 +102,7 @@ export function ContentAndMediaSettingsScreen({}: Props) {
           </SettingsList.LinkItem>
           <SettingsList.LinkItem
             to="/settings/interests"
-            label={_(msg`Your interests`)}>
+            label={l`Your interests`}>
             <SettingsList.ItemIcon icon={CircleInfo} />
             <SettingsList.ItemText>
               <Trans>Your interests</Trans>
@@ -101,7 +112,7 @@ export function ContentAndMediaSettingsScreen({}: Props) {
           {IS_NATIVE && (
             <Toggle.Item
               name="use_in_app_browser"
-              label={_(msg`Use in-app browser to open links`)}
+              label={l`Use in-app browser to open links`}
               value={inAppBrowserPref ?? false}
               onChange={value => setUseInAppBrowser(value)}>
               <SettingsList.Item>
@@ -115,7 +126,7 @@ export function ContentAndMediaSettingsScreen({}: Props) {
           )}
           <Toggle.Item
             name="disable_autoplay"
-            label={_(msg`Autoplay videos and GIFs`)}
+            label={l`Autoplay videos and GIFs`}
             value={!autoplayDisabledPref}
             onChange={value => setAutoplayDisabledPref(!value)}>
             <SettingsList.Item>
@@ -126,12 +137,39 @@ export function ContentAndMediaSettingsScreen({}: Props) {
               <Toggle.Platform />
             </SettingsList.Item>
           </Toggle.Item>
+          <SettingsList.Divider />
+          <Toggle.Item
+            name="hide_media"
+            label={l`Hide media in posts`}
+            value={hideMediaPref}
+            onChange={value => setHideMediaPref(value)}>
+            <SettingsList.Item>
+              <SettingsList.ItemIcon icon={EyeSlashIcon} />
+              <SettingsList.ItemText>
+                <Trans>Hide media in posts</Trans>
+              </SettingsList.ItemText>
+              <Toggle.Platform />
+            </SettingsList.Item>
+          </Toggle.Item>
+          <Toggle.Item
+            name="hide_profile_media"
+            label={l`Hide Profile media`}
+            value={hideProfileMediaPref}
+            onChange={value => setHideProfileMediaPref(value)}>
+            <SettingsList.Item>
+              <SettingsList.ItemIcon icon={UserCircleIcon} />
+              <SettingsList.ItemText>
+                <Trans>Hide Profile media</Trans>
+              </SettingsList.ItemText>
+              <Toggle.Platform />
+            </SettingsList.Item>
+          </Toggle.Item>
           {trendingEnabled ? (
             <>
               <SettingsList.Divider />
               <Toggle.Item
                 name="show_trending_topics"
-                label={_(msg`Enable trending topics`)}
+                label={l`Enable trending topics`}
                 value={!trendingDisabled}
                 onChange={value => {
                   const hide = Boolean(!value)
@@ -152,7 +190,7 @@ export function ContentAndMediaSettingsScreen({}: Props) {
               </Toggle.Item>
               <Toggle.Item
                 name="show_trending_videos"
-                label={_(msg`Enable trending videos in your Discover feed`)}
+                label={l`Enable trending videos in your Discover feed`}
                 value={!trendingVideoDisabled}
                 onChange={value => {
                   const hide = Boolean(!value)

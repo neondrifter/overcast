@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import {Alert, LayoutAnimation, Linking, Pressable, View} from 'react-native'
+import {Alert, LayoutAnimation, Pressable, View} from 'react-native'
 import {useReducedMotion} from 'react-native-reanimated'
 import {removeNuxs} from '@bsky/sdk'
 import {moderateProfile} from '@bsky/sdk/moderation'
@@ -8,7 +8,7 @@ import {Trans, useLingui} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 
-import {HELP_DESK_URL, HITSLOP_10} from '#/lib/constants'
+import {HITSLOP_10} from '#/lib/constants'
 import {useAccountSwitcher} from '#/lib/hooks/useAccountSwitcher'
 import {useApplyPullRequestOTAUpdate} from '#/lib/hooks/useOTAUpdates'
 import {
@@ -44,7 +44,6 @@ import {Beaker_Stroke2_Corner2_Rounded as BeakerIcon} from '#/components/icons/B
 import {Bell_Stroke2_Corner0_Rounded as NotificationIcon} from '#/components/icons/Bell'
 import {BubbleInfo_Stroke2_Corner2_Rounded as BubbleInfoIcon} from '#/components/icons/BubbleInfo'
 import {ChevronTop_Stroke2_Corner0_Rounded as ChevronUpIcon} from '#/components/icons/Chevron'
-import {CircleQuestion_Stroke2_Corner2_Rounded as CircleQuestionIcon} from '#/components/icons/CircleQuestion'
 import {CodeBrackets_Stroke2_Corner2_Rounded as CodeBracketsIcon} from '#/components/icons/CodeBrackets'
 import {Contacts_Stroke2_Corner2_Rounded as ContactsIcon} from '#/components/icons/Contacts'
 import {DotGrid3x1_Stroke2_Corner0_Rounded as DotsHorizontal} from '#/components/icons/DotGrid'
@@ -274,16 +273,6 @@ export function SettingsScreen({}: Props) {
               <Trans>Beta features</Trans>
             </SettingsList.ItemText>
           </SettingsList.LinkItem>
-          <SettingsList.PressableItem
-            onPress={() => void Linking.openURL(HELP_DESK_URL)}
-            label={l`Help`}
-            accessibilityHint={l`Opens helpdesk in browser`}>
-            <SettingsList.ItemIcon icon={CircleQuestionIcon} />
-            <SettingsList.ItemText>
-              <Trans>Help</Trans>
-            </SettingsList.ItemText>
-            <SettingsList.Chevron />
-          </SettingsList.PressableItem>
           <SettingsList.LinkItem to="/settings/about" label={l`About`}>
             <SettingsList.ItemIcon icon={BubbleInfoIcon} />
             <SettingsList.ItemText>

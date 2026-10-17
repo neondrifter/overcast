@@ -180,6 +180,7 @@ export function Avatar({
     <UserAvatar
       size={size}
       avatar={profile.avatar}
+      fallbackName={profile.displayName || profile.handle}
       type={profile.associated?.labeler ? 'labeler' : 'user'}
       moderation={moderation.ui('avatar')}
       live={liveOverride ?? live}

@@ -1,14 +1,11 @@
 import {useEffect, useState} from 'react'
 import {Pressable, View} from 'react-native'
-import {msg} from '@lingui/core/macro'
-import {useLingui} from '@lingui/react'
-import {Trans} from '@lingui/react/macro'
+import {Trans, useLingui} from '@lingui/react/macro'
 
 import {useWebMediaQueries} from '#/lib/hooks/useWebMediaQueries'
 import {ErrorBoundary} from '#/view/com/util/ErrorBoundary'
 import {Logo} from '#/view/icons/Logo'
 import {Logotype} from '#/view/icons/Logotype'
-import {useLogoVariant} from '#/view/icons/useLogoVariant'
 import {
   AppClipOverlay,
   postAppClipMessage,
@@ -18,7 +15,6 @@ import {AppLanguageDropdown} from '#/components/AppLanguageDropdown'
 import {Button, ButtonText} from '#/components/Button'
 import {TimesLarge_Stroke2_Corner0_Rounded as TimesIcon} from '#/components/icons/Times'
 import * as Layout from '#/components/Layout'
-import {InlineLinkText} from '#/components/Link'
 import {Text} from '#/components/Typography'
 
 export const SplashScreen = ({
@@ -30,7 +26,7 @@ export const SplashScreen = ({
   onPressSignin: () => void
   onPressCreateAccount: () => void
 }) => {
-  const {_} = useLingui()
+  const {t: l} = useLingui()
   const t = useTheme()
   const {isTabletOrMobile: IS_WEB_MOBILE} = useWebMediaQueries()
   const [showClipOverlay, setShowClipOverlay] = useState(false)
@@ -45,9 +41,6 @@ export const SplashScreen = ({
       })
     }
   }, [])
-
-  const logoVariant = useLogoVariant()
-  const kawaii = logoVariant === 'kawaii'
 
   return (
     <>
@@ -81,13 +74,11 @@ export const SplashScreen = ({
           ]}>
           <ErrorBoundary>
             <View style={[a.justify_center, a.align_center]}>
-              <Logo width={kawaii ? 300 : 92} fill="sky" />
+              <Logo width={92} fill="sky" />
 
-              {!kawaii && (
-                <View style={[a.pb_sm, a.pt_5xl]}>
-                  <Logotype width={161} fill={t.atoms.text.color} />
-                </View>
-              )}
+              <View style={[a.pb_sm, a.pt_5xl]}>
+                <Logotype width={180} fill={t.atoms.text.color} />
+              </View>
 
               <Text
                 style={[
@@ -95,7 +86,7 @@ export const SplashScreen = ({
                   a.font_semi_bold,
                   t.atoms.text_contrast_medium,
                 ]}>
-                <Trans>What's up?</Trans>
+                <Trans>A calm, overcast social space</Trans>
               </Text>
             </View>
 
@@ -105,10 +96,8 @@ export const SplashScreen = ({
               <Button
                 testID="createAccountButton"
                 onPress={onPressCreateAccount}
-                label={_(msg`Create new account`)}
-                accessibilityHint={_(
-                  msg`Opens flow to create a new Bluesky account`,
-                )}
+                label={l`Create new account`}
+                accessibilityHint={l`Opens flow to create a new Overcast account`}
                 size="large"
                 variant="solid"
                 color="primary">
@@ -119,10 +108,8 @@ export const SplashScreen = ({
               <Button
                 testID="signInButton"
                 onPress={onPressSignin}
-                label={_(msg`Sign in`)}
-                accessibilityHint={_(
-                  msg`Opens flow to sign in to your existing Bluesky account`,
-                )}
+                label={l`Sign in`}
+                accessibilityHint={l`Opens flow to sign in to your existing account`}
                 size="large"
                 variant="solid"
                 color="secondary">
@@ -145,7 +132,6 @@ export const SplashScreen = ({
 
 function Footer() {
   const t = useTheme()
-  const {_} = useLingui()
 
   return (
     <View
@@ -163,24 +149,6 @@ function Footer() {
         a.flex_1,
         t.atoms.border_contrast_medium,
       ]}>
-      <InlineLinkText
-        label={_(msg`Learn more about Bluesky`)}
-        to="https://bsky.social">
-        <Trans>Business</Trans>
-      </InlineLinkText>
-      <InlineLinkText
-        label={_(msg`Read the Bluesky blog`)}
-        to="https://bsky.social/about/blog">
-        <Trans>Blog</Trans>
-      </InlineLinkText>
-      <InlineLinkText
-        label={_(msg`See jobs at Bluesky`)}
-        to="https://bsky.social/about/join">
-        <Trans comment="Link to a page with job openings at Bluesky">
-          Jobs
-        </Trans>
-      </InlineLinkText>
-
       <View style={a.flex_1} />
 
       <AppLanguageDropdown />

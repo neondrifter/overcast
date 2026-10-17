@@ -474,6 +474,7 @@ function Inner({
           <UserAvatar
             size={64}
             avatar={profile.avatar}
+            fallbackName={profile.displayName || profile.handle}
             type={isLabeler ? 'labeler' : 'user'}
             moderation={moderation.ui('avatar')}
           />

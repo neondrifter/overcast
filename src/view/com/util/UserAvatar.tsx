@@ -37,7 +37,12 @@ import {
   compressImage,
   createComposerImage,
 } from '#/state/gallery'
-import {unstableCacheProfileView} from '#/state/queries/unstable-profile-cache'
+import {useHideProfileMediaEnabled} from '#/state/preferences'
+import {
+  unstableCacheProfileView,
+  unstableProfileViewCacheQueryKey,
+} from '#/state/queries/unstable-profile-cache'
+import {useSession} from '#/state/session'
 import {EditImageDialog} from '#/view/com/composer/photos/EditImageDialog'
 import {atoms as a, tokens, useTheme} from '#/alf'
 import {Button} from '#/components/Button'
@@ -67,6 +72,7 @@ interface BaseUserAvatarProps {
   shape?: 'circle' | 'square'
   size: number
   avatar?: string | null
+  fallbackName?: string
   live?: boolean
   hideLiveBadge?: boolean
 }
@@ -95,6 +101,162 @@ interface PreviewableUserAvatarProps extends BaseUserAvatarProps {
 }
 
 const BLUR_AMOUNT = IS_WEB ? 5 : 100
+
+function getAvatarInitial(rawName?: string): string {
+  if (!rawName) return ''
+  const cleaned = rawName.replace(/^@+/, '').trim()
+  if (!cleaned) return ''
+  const letterOrDigit = cleaned.match(/[\p{L}\p{N}]/u)?.[0]
+  if (letterOrDigit) {
+    return letterOrDigit.toUpperCase()
+  }
+  return ([...cleaned][0] ?? '').toUpperCase()
+}
+
+const OVERCAST_SKY_PALETTES_LIGHT = [
+  {
+    sky: '#CBE2F8',
+    backCloud: '#79B4EC',
+    frontCloud: '#F0F5FA',
+    text: '#164578',
+  },
+  {
+    sky: '#C5DCF5',
+    backCloud: '#67A6E5',
+    frontCloud: '#EEF4FA',
+    text: '#194B82',
+  },
+  {
+    sky: '#CFE6F7',
+    backCloud: '#6DB8E8',
+    frontCloud: '#F2F7FC',
+    text: '#155078',
+  },
+  {
+    sky: '#D0DDF7',
+    backCloud: '#7DA2E8',
+    frontCloud: '#F0F4FB',
+    text: '#214485',
+  },
+  {
+    sky: '#C2DFEE',
+    backCloud: '#5CA7CF',
+    frontCloud: '#EEF6FA',
+    text: '#144E6E',
+  },
+] as const
+
+const OVERCAST_SKY_PALETTES_DARK = [
+  {
+    sky: '#162C46',
+    backCloud: '#2B6CB0',
+    frontCloud: '#2D4159',
+    text: '#EBF4FF',
+  },
+  {
+    sky: '#18314E',
+    backCloud: '#3178C6',
+    frontCloud: '#324760',
+    text: '#EBF4FF',
+  },
+  {
+    sky: '#142F47',
+    backCloud: '#2878A8',
+    frontCloud: '#2B4257',
+    text: '#EBF4FF',
+  },
+  {
+    sky: '#1B2D4B',
+    backCloud: '#3867B8',
+    frontCloud: '#31435E',
+    text: '#EBF4FF',
+  },
+  {
+    sky: '#153247',
+    backCloud: '#26729C',
+    frontCloud: '#2C4558',
+    text: '#EBF4FF',
+  },
+] as const
+
+function OvercastAvatar({
+  size,
+  borderRadius,
+  initial,
+}: {
+  size: number
+  borderRadius: ImageStyle['borderRadius']
+  initial: string
+}) {
+  const t = useTheme()
+  const isDark = t.name !== 'light'
+  const paletteList = isDark
+    ? OVERCAST_SKY_PALETTES_DARK
+    : OVERCAST_SKY_PALETTES_LIGHT
+  const paletteIndex = initial ? initial.charCodeAt(0) % paletteList.length : 0
+  const skyTheme = paletteList[paletteIndex]
+  const highlightColor = isDark ? '#5482B8' : '#FFFFFF'
+  const fontSize = Math.max(8, Math.round(size * 0.34))
+
+  return (
+    <View
+      testID="userAvatarOvercast"
+      style={[
+        a.align_center,
+        a.justify_center,
+        a.overflow_hidden,
+        {
+          width: size,
+          height: size,
+          borderRadius,
+          backgroundColor: skyTheme.sky,
+        },
+      ]}>
+      <Svg
+        width={size}
+        height={size}
+        viewBox="0 0 32 32"
+        fill="none"
+        style={[a.absolute, a.inset_0]}>
+        {/* Upper-right sky-blue cloud crest */}
+        <Path
+          fill={skyTheme.backCloud}
+          d="M17.2 14.8h8.6c1.8 0 3.2-1.4 3.2-3.1 0-1.6-1.1-2.9-2.7-3.1-.5-2.1-2.3-3.6-4.6-3.6-1.9 0-3.6 1.1-4.3 2.8-.3-.1-.6-.1-.9-.1-1.9 0-3.4 1.5-3.4 3.4 0 2.1 1.5 3.7 4.1 3.7Z"
+        />
+        {/* Cute plump foreground cloud */}
+        <Path
+          fill={skyTheme.frontCloud}
+          d="M8.4 24.5h15.2c3 0 5.4-2.3 5.4-5.2 0-2.6-1.9-4.8-4.5-5.1-.8-3.6-3.9-6.2-7.7-6.2-3.2 0-6 1.9-7.1 4.7-.5-.1-1-.2-1.5-.2-3.1 0-5.6 2.5-5.6 5.6 0 3.5 2.5 6.4 5.8 6.4Z"
+        />
+        {/* Soft top highlight along the cloud puff */}
+        <Path
+          fill={highlightColor}
+          opacity={isDark ? 0.35 : 0.75}
+          d="M16.8 9.2c-2.6 0-4.9 1.5-5.9 3.9-.2.5-.7.8-1.2.7-.4-.1-.8-.2-1.2-.2-2.2 0-4.1 1.7-4.2 3.9-.3-.6-.4-1.2-.4-1.9 0-2.5 2-4.5 4.5-4.5.4 0 .8.1 1.2.2.9-2.3 3.1-3.9 5.8-3.9 2.9 0 5.4 2 6.1 4.8-1.2-1.8-2.8-3-4.7-3Z"
+        />
+      </Svg>
+      {initial ? (
+        <RNText
+          style={[
+            a.font_bold,
+            a.text_center,
+            {
+              fontSize,
+              lineHeight: Math.round(fontSize * 1.15),
+              color: skyTheme.text,
+              includeFontPadding: false,
+              textAlignVertical: 'center',
+              marginTop: Math.round(size * 0.1),
+            },
+          ]}
+          minimumFontScale={1}
+          maxFontSizeMultiplier={1}>
+          {initial}
+        </RNText>
+      ) : null}
+    </View>
+  )
+}
 
 let DefaultAvatar = ({
   type,
@@ -221,6 +383,7 @@ let UserAvatar = ({
   shape: overrideShape,
   size,
   avatar,
+  fallbackName,
   moderation,
   usePlainRNImage = false,
   onLoad,
@@ -231,6 +394,9 @@ let UserAvatar = ({
   extraAviStyle,
 }: UserAvatarProps): React.ReactNode => {
   const t = useTheme()
+  const hideProfileMedia = useHideProfileMediaEnabled()
+  const queryClient = useQueryClient()
+  const {accounts} = useSession()
   const finalShape = overrideShape ?? (type === 'user' ? 'circle' : 'square')
 
   const aviStyle = useMemo(() => {
@@ -306,6 +472,47 @@ let UserAvatar = ({
       style,
     ]
   }, [size, style])
+
+  if (hideProfileMedia) {
+    let resolvedName = fallbackName
+    if (!resolvedName && avatar) {
+      const did = avatar.match(/did:[a-z0-9:%._-]+/i)?.[0]
+      if (did) {
+        const cached =
+          queryClient.getQueryData<bsky.profile.AnyProfileView>(
+            unstableProfileViewCacheQueryKey(did),
+          ) ??
+          queryClient.getQueryData<bsky.profile.AnyProfileView>([
+            'profile',
+            did,
+          ])
+        if (cached) {
+          resolvedName = cached.displayName || cached.handle
+        } else {
+          const account = accounts.find(acc => acc.did === did)
+          if (account) {
+            resolvedName = account.handle
+          }
+        }
+      }
+    }
+    const initial = getAvatarInitial(resolvedName)
+
+    return (
+      <View style={containerStyle}>
+        <OvercastAvatar
+          size={size}
+          borderRadius={aviStyle.borderRadius}
+          initial={initial}
+        />
+        {!noBorder && <MediaInsetBorder style={borderStyle} />}
+        {live && size > 16 && !hideLiveBadge && (
+          <LiveIndicator size={size > 32 ? 'small' : 'tiny'} />
+        )}
+        {alert}
+      </View>
+    )
+  }
 
   return avatar &&
     !(moderation?.blur && IS_ANDROID /* android crashes with blur */) ? (
@@ -578,6 +785,7 @@ let PreviewableUserAvatar = ({
   const avatarEl = (
     <UserAvatar
       avatar={profile.avatar}
+      fallbackName={profile.displayName || profile.handle}
       moderation={moderation}
       type={profile.associated?.labeler ? 'labeler' : 'user'}
       live={status.isActive || live}

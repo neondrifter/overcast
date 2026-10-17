@@ -49,6 +49,7 @@ import {ExternalEmbed} from './ExternalEmbed'
 import {ModeratedFeedEmbed} from './FeedEmbed'
 import {ImageEmbed} from './ImageEmbed'
 import {ModeratedListEmbed} from './ListEmbed'
+import {OvercastMediaHider} from './OvercastMediaHider'
 import {PostPlaceholder as PostPlaceholderText} from './PostPlaceholder'
 import {type CommonProps, type EmbedProps, PostEmbedViewContext} from './types'
 import {VideoEmbed} from './VideoEmbed'
@@ -106,7 +107,13 @@ function MediaEmbed({
         <ContentHider
           modui={rest.moderation?.ui('contentMedia')}
           activeStyle={[a.mt_sm]}>
-          <ImageEmbed embed={embed} {...rest} />
+          <OvercastMediaHider kind="image" style={[a.mt_sm]}>
+            <ImageEmbed
+              embed={embed}
+              {...rest}
+              style={[rest.style, {marginTop: 0}]}
+            />
+          </OvercastMediaHider>
         </ContentHider>
       )
     }
@@ -154,7 +161,11 @@ function MediaEmbed({
         <ContentHider
           modui={rest.moderation?.ui('contentMedia')}
           activeStyle={[a.mt_sm]}>
-          <VideoEmbed embed={embed.view} post={rest.post} />
+          <OvercastMediaHider
+            kind={embed.view.presentation === 'gif' ? 'gif' : 'video'}
+            style={[a.mt_xs]}>
+            <VideoEmbed embed={embed.view} post={rest.post} />
+          </OvercastMediaHider>
         </ContentHider>
       )
     }
