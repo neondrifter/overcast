@@ -137,6 +137,9 @@ const schema = z.object({
   disableAutoplay: z.boolean().optional(),
   hideMedia: z.boolean().optional(),
   hideProfileMedia: z.boolean().optional(),
+  mediaOverlayStyle: z
+    .enum(['clouds', 'autumn', 'christmas', 'lootbox'])
+    .optional(),
   kawaii: z.boolean().optional(),
   hasCheckedForStarterPack: z.boolean().optional(),
   subtitlesEnabled: z.boolean().optional(),
@@ -188,6 +191,7 @@ export const defaults: Schema = {
   disableAutoplay: PlatformInfo.getIsReducedMotionEnabled(),
   hideMedia: false,
   hideProfileMedia: false,
+  mediaOverlayStyle: 'clouds',
   kawaii: false,
   hasCheckedForStarterPack: false,
   subtitlesEnabled: true,

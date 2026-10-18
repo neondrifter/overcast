@@ -1,14 +1,18 @@
+import {View} from 'react-native'
 import {Trans, useLingui} from '@lingui/react/macro'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 
 import {type CommonNavigatorParams} from '#/lib/routes/types'
 import {
+  type MediaOverlayStyle,
   useAutoplayDisabled,
   useHideMediaEnabled,
   useHideProfileMediaEnabled,
+  useMediaOverlayStyle,
   useSetAutoplayDisabled,
   useSetHideMediaEnabled,
   useSetHideProfileMediaEnabled,
+  useSetMediaOverlayStyle,
 } from '#/state/preferences'
 import {
   useInAppBrowser,
@@ -20,6 +24,7 @@ import {
 } from '#/state/preferences/trending'
 import {useTrendingConfig} from '#/state/service-config'
 import * as SettingsList from '#/screens/Settings/components/SettingsList'
+import {atoms as a, useTheme} from '#/alf'
 import * as Toggle from '#/components/forms/Toggle'
 import {Bubbles_Stroke2_Corner2_Rounded as BubblesIcon} from '#/components/icons/Bubble'
 import {CircleInfo_Stroke2_Corner0_Rounded as CircleInfo} from '#/components/icons/CircleInfo'
@@ -28,10 +33,12 @@ import {Hashtag_Stroke2_Corner0_Rounded as HashtagIcon} from '#/components/icons
 import {Home_Stroke2_Corner2_Rounded as HomeIcon} from '#/components/icons/Home'
 import {Macintosh_Stroke2_Corner2_Rounded as MacintoshIcon} from '#/components/icons/Macintosh'
 import {Play_Stroke2_Corner2_Rounded as PlayIcon} from '#/components/icons/Play'
+import {Sparkle_Stroke2_Corner0_Rounded as SparkleIcon} from '#/components/icons/Sparkle'
 import {Trending2_Stroke2_Corner2_Rounded as Graph} from '#/components/icons/Trending'
 import {UserCircle_Stroke2_Corner0_Rounded as UserCircleIcon} from '#/components/icons/UserCircle'
 import {Window_Stroke2_Corner2_Rounded as WindowIcon} from '#/components/icons/Window'
 import * as Layout from '#/components/Layout'
+import {Text} from '#/components/Typography'
 import {useAnalytics} from '#/analytics'
 import {IS_NATIVE} from '#/env'
 
@@ -41,6 +48,7 @@ type Props = NativeStackScreenProps<
 >
 export function ContentAndMediaSettingsScreen({}: Props) {
   const {t: l} = useLingui()
+  const t = useTheme()
   const ax = useAnalytics()
   const autoplayDisabledPref = useAutoplayDisabled()
   const setAutoplayDisabledPref = useSetAutoplayDisabled()
@@ -48,6 +56,8 @@ export function ContentAndMediaSettingsScreen({}: Props) {
   const setHideMediaPref = useSetHideMediaEnabled()
   const hideProfileMediaPref = useHideProfileMediaEnabled()
   const setHideProfileMediaPref = useSetHideProfileMediaEnabled()
+  const mediaOverlayStyle = useMediaOverlayStyle()
+  const setMediaOverlayStyle = useSetMediaOverlayStyle()
   const inAppBrowserPref = useInAppBrowser()
   const setUseInAppBrowser = useSetInAppBrowser()
   const {enabled: trendingEnabled} = useTrendingConfig()
@@ -164,6 +174,58 @@ export function ContentAndMediaSettingsScreen({}: Props) {
               <Toggle.Platform />
             </SettingsList.Item>
           </Toggle.Item>
+          <SettingsList.Group>
+            <SettingsList.ItemIcon icon={SparkleIcon} />
+            <SettingsList.ItemText>
+              <Trans>Media overlay style</Trans>
+            </SettingsList.ItemText>
+            <View style={[a.w_full, a.gap_md]}>
+              <Text style={[a.flex_1, t.atoms.text_contrast_medium]}>
+                <Trans>
+                  Choose the overlay used when hiding media in posts:
+                </Trans>
+              </Text>
+              <Toggle.Group
+                label={l`Media overlay style`}
+                type="radio"
+                values={[mediaOverlayStyle]}
+                onChange={values => {
+                  const next = values[0] as MediaOverlayStyle | undefined
+                  if (next) {
+                    setMediaOverlayStyle(next)
+                  }
+                }}>
+                <View style={[a.gap_sm, a.flex_1]}>
+                  <Toggle.Item name="clouds" label={l`Overcast Clouds`}>
+                    <Toggle.Radio />
+                    <Toggle.LabelText>
+                      <Trans>Overcast Clouds</Trans>
+                    </Toggle.LabelText>
+                  </Toggle.Item>
+                  <Toggle.Item name="autumn" label={l`Autumn Leaves`}>
+                    <Toggle.Radio />
+                    <Toggle.LabelText>
+                      <Trans>Autumn Leaves</Trans>
+                    </Toggle.LabelText>
+                  </Toggle.Item>
+                  <Toggle.Item
+                    name="christmas"
+                    label={l`Christmas Wrapping Paper`}>
+                    <Toggle.Radio />
+                    <Toggle.LabelText>
+                      <Trans>Christmas Wrapping Paper</Trans>
+                    </Toggle.LabelText>
+                  </Toggle.Item>
+                  <Toggle.Item name="lootbox" label={l`Loot Box`}>
+                    <Toggle.Radio />
+                    <Toggle.LabelText>
+                      <Trans>Loot Box</Trans>
+                    </Toggle.LabelText>
+                  </Toggle.Item>
+                </View>
+              </Toggle.Group>
+            </View>
+          </SettingsList.Group>
           {trendingEnabled ? (
             <>
               <SettingsList.Divider />

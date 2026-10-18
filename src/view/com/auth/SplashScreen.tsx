@@ -16,6 +16,7 @@ import {Logo} from '#/view/icons/Logo'
 import {Logotype} from '#/view/icons/Logotype'
 import {atoms as a, useTheme} from '#/alf'
 import {Button, ButtonText} from '#/components/Button'
+import {Text} from '#/components/Typography'
 
 /**
  * Full-screen peaceful overcast sky illustration replacing the proprietary
@@ -149,6 +150,17 @@ export const SplashScreen = ({
             fill={styles.logoFill}
             style={styles.logoShadow}
           />
+          <Text
+            style={[
+              a.text_md,
+              a.font_semi_bold,
+              {
+                color: styles.logoFill,
+                opacity: 0.85,
+              },
+            ]}>
+            <Trans>An umbrella for your social feed.</Trans>
+          </Text>
         </View>
 
         <View style={[a.flex_1]} />

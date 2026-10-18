@@ -86,7 +86,7 @@ export const SplashScreen = ({
                   a.font_semi_bold,
                   t.atoms.text_contrast_medium,
                 ]}>
-                <Trans>A calm, overcast social space</Trans>
+                <Trans>An umbrella for your social feed.</Trans>
               </Text>
             </View>
 

@@ -24,10 +24,13 @@ export {
 } from './external-embeds-prefs'
 export {useHiddenPosts, useHiddenPostsApi} from './hidden-posts'
 export {
+  type MediaOverlayStyle,
   useHideMediaEnabled,
   useHideProfileMediaEnabled,
+  useMediaOverlayStyle,
   useSetHideMediaEnabled,
   useSetHideProfileMediaEnabled,
+  useSetMediaOverlayStyle,
 } from './hide-media'
 export {useLabelDefinitions} from './label-defs'
 export {useLanguagePrefs, useLanguagePrefsApi} from './languages'
