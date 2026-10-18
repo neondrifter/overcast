@@ -3,8 +3,8 @@ import {View} from 'react-native'
 import {PrivacySensitive} from 'expo-privacy-sensitive'
 
 import {useAppState} from '#/lib/appState'
+import {Logo} from '#/view/icons/Logo'
 import {atoms as a, useTheme} from '#/alf'
-import {Mark as Logo} from '#/components/icons/brands/Mark'
 import {sizes as iconSizes} from '#/components/icons/common'
 import {IS_IOS} from '#/env'
 
@@ -60,7 +60,7 @@ export function GrowthHack({
           {children}
         </View>
       </PrivacySensitive>
-      <Logo size={ICON_SIZE} />
+      <Logo width={iconSizes[ICON_SIZE]} />
     </View>
   )
 }
