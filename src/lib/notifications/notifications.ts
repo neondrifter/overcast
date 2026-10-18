@@ -1,23 +1,15 @@
 import {useCallback, useEffect} from 'react'
-import {Platform} from 'react-native'
 import * as Notifications from 'expo-notifications'
 import {getBadgeCountAsync, setBadgeCountAsync} from 'expo-notifications'
 import {type Client} from '@atproto/lex'
 import BackgroundNotificationHandler from '@bsky.app/expo-background-notification-handler'
 import debounce from 'lodash.debounce'
 
-import {
-  NOTIF_SERVICE,
-  PUBLIC_APPVIEW_DID,
-  PUBLIC_STAGING_APPVIEW_DID,
-} from '#/lib/constants'
 import {logger as notyLogger} from '#/lib/notifications/util'
-import {isNetworkError} from '#/lib/strings/errors'
 import {type SessionAccount, usePdsClient, useSession} from '#/state/session'
 import {useAgeAssurance} from '#/ageAssurance'
 import {useAnalytics} from '#/analytics'
 import {IS_DEV, IS_NATIVE} from '#/env'
-import {app} from '#/lexicons'
 
 /**
  * A resumed single-use account client paired with the account's service origin
@@ -34,14 +26,9 @@ export type TemporaryPushClient = {
 
 /**
  * @private
- * Registers the device's push notification token with the Bluesky server.
+ * Push notification token registration with Bluesky's servers is disabled in Overcast.
  */
-async function _registerPushToken({
-  client,
-  currentAccount,
-  token,
-  extra = {},
-}: {
+function _registerPushToken(_args: {
   client: Client
   currentAccount: SessionAccount
   token: Notifications.DevicePushToken
@@ -49,29 +36,8 @@ async function _registerPushToken({
     ageRestricted?: boolean
   }
 }) {
-  try {
-    const payload: app.bsky.notification.registerPush.$InputBody = {
-      serviceDid: currentAccount.service?.includes('staging')
-        ? PUBLIC_STAGING_APPVIEW_DID
-        : PUBLIC_APPVIEW_DID,
-      platform: Platform.OS,
-      token: token.data,
-      appId: 'xyz.blueskyweb.app',
-      ageRestricted: extra.ageRestricted ?? false,
-    }
-
-    notyLogger.debug(`registerPushToken: registering`, {...payload})
-
-    await client.call(app.bsky.notification.registerPush, payload, {
-      service: NOTIF_SERVICE,
-    })
-
-    notyLogger.debug(`registerPushToken: success`)
-  } catch (error) {
-    if (!isNetworkError(error)) {
-      notyLogger.warn(`registerPushToken: failed`, {safeMessage: error})
-    }
-  }
+  // Disabled in Overcast so the app never sends a device token to Bluesky's servers.
+  return Promise.resolve()
 }
 
 /**
@@ -344,33 +310,6 @@ export async function resetBadgeCount() {
   await setBadgeCountAsync(0)
 }
 
-export async function unregisterPushToken(clients: TemporaryPushClient[]) {
-  if (!IS_NATIVE) return
-
-  try {
-    const token = await getPushToken()
-    if (token) {
-      for (const {client, service, handle} of clients) {
-        await client.call(
-          app.bsky.notification.unregisterPush,
-          {
-            serviceDid: service.includes('staging')
-              ? PUBLIC_STAGING_APPVIEW_DID
-              : PUBLIC_APPVIEW_DID,
-            platform: Platform.OS,
-            token: token.data,
-            appId: 'xyz.blueskyweb.app',
-          },
-          {
-            service: NOTIF_SERVICE,
-          },
-        )
-        notyLogger.debug(`Push token unregistered for ${handle}`)
-      }
-    } else {
-      notyLogger.debug('Tried to unregister push token, but could not find one')
-    }
-  } catch (error) {
-    notyLogger.debug('Failed to unregister push token', {message: error})
-  }
+export function unregisterPushToken(_clients: TemporaryPushClient[]) {
+  return Promise.resolve()
 }

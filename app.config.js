@@ -1,4 +1,6 @@
 // @ts-check
+// oxlint-disable-next-line import/no-nodejs-modules
+const fs = require('node:fs')
 const pkg = require('./package.json')
 
 /**
@@ -23,24 +25,10 @@ module.exports = function (_config) {
   const IS_E2E = process.env.EXPO_PUBLIC_ENV === 'e2e'
   const IS_DEV = !IS_TESTFLIGHT && !IS_PRODUCTION
 
-  const ASSOCIATED_DOMAINS = [
-    'applinks:bsky.app',
-    'applinks:staging.bsky.app',
-    'appclips:bsky.app',
-    'appclips:go.bsky.app', // Allows App Clip to work when scanning QR codes
-    // When testing local services, enter an ngrok (et al) domain here. It must use a standard HTTP/HTTPS port.
-    ...(IS_DEV || IS_TESTFLIGHT ? [] : []),
-  ]
+  /** @type {string[]} */
+  const ASSOCIATED_DOMAINS = []
 
-  /*
-   * EXPO_PUBLIC_ENV is also an EAS environment secret, which wins over a build
-   * profile's env, so profiles opt out of OTA updates with their own flag. A
-   * dev client with updates on rejects unsigned manifests from a local Metro.
-   */
-  const UPDATES_ENABLED =
-    (IS_TESTFLIGHT || IS_PRODUCTION) && !process.env.DISABLE_UPDATES
-
-  const USE_SENTRY = Boolean(process.env.SENTRY_AUTH_TOKEN)
+  const UPDATES_ENABLED = false
 
   const IOS_ICON_FILE =
     PLATFORM === 'web' // web build doesn't like .icon files
@@ -55,7 +43,6 @@ module.exports = function (_config) {
       name: 'Overcast',
       slug: 'overcast',
       scheme: 'overcast',
-      owner: 'overcast',
       runtimeVersion: {
         policy: 'appVersion',
       },
@@ -64,7 +51,7 @@ module.exports = function (_config) {
       primaryColor: '#2B7AC9',
       ios: {
         supportsTablet: false,
-        bundleIdentifier: 'xyz.blueskyweb.app',
+        bundleIdentifier: 'com.neondrifter.overcast',
         appleTeamId: process.env.EXPO_APPLE_TEAM_ID,
         config: {
           usesNonExemptEncryption: false,
@@ -82,7 +69,7 @@ module.exports = function (_config) {
             'Used to save images to your library.',
           NSPhotoLibraryUsageDescription:
             'Used for profile pictures, posts, and other kinds of content',
-          CFBundleSpokenName: 'Blue Sky',
+          CFBundleSpokenName: 'Overcast',
           CFBundleLocalizations: [
             'en',
             'an',
@@ -131,7 +118,8 @@ module.exports = function (_config) {
         entitlements: {
           'com.apple.developer.kernel.increased-memory-limit': true,
           'com.apple.developer.kernel.extended-virtual-addressing': true,
-          'com.apple.security.application-groups': 'group.app.bsky',
+          'com.apple.security.application-groups':
+            'group.com.neondrifter.overcast',
           'com.apple.developer.usernotifications.communication': true,
           // 'com.apple.developer.device-information.user-assigned-device-name': true,
           'com.apple.developer.declared-age-range': true,
@@ -193,49 +181,20 @@ module.exports = function (_config) {
         adaptiveIcon: {
           foregroundImage: './assets/icon-android-foreground.png',
           monochromeImage: './assets/icon-android-monochrome.png',
-          backgroundColor: '#006AFF',
+          backgroundColor: '#2B7AC9',
         },
-        googleServicesFile: './google-services.json',
-        package: 'xyz.blueskyweb.app',
-        intentFilters: [
-          {
-            action: 'VIEW',
-            autoVerify: true,
-            data: [
-              {
-                scheme: 'https',
-                host: 'bsky.app',
-              },
-              ...(IS_DEV
-                ? [
-                    {
-                      scheme: 'http',
-                      host: 'localhost:19006',
-                    },
-                  ]
-                : []),
-            ],
-            category: ['BROWSABLE', 'DEFAULT'],
-          },
-        ],
+        ...(fs.existsSync('./google-services.json')
+          ? {googleServicesFile: './google-services.json'}
+          : {}),
+        package: 'com.neondrifter.overcast',
       },
       web: {
         bundler: 'metro',
         favicon: './assets/favicon.png',
       },
       updates: {
-        url: 'https://updates.bsky.app/manifest',
         enabled: UPDATES_ENABLED,
         fallbackToCacheTimeout: 30000,
-        codeSigningCertificate: UPDATES_ENABLED
-          ? './code-signing/certificate.pem'
-          : undefined,
-        codeSigningMetadata: UPDATES_ENABLED
-          ? {
-              keyid: 'main',
-              alg: 'rsa-v1_5-sha256',
-            }
-          : undefined,
         checkAutomatically: 'NEVER',
       },
       plugins: [
@@ -281,32 +240,6 @@ module.exports = function (_config) {
           'react-native-edge-to-edge',
           {android: {enforceNavigationBarContrast: false}},
         ],
-        /*
-         * Expo runs Gradle mods in reverse registration order. Keep Bitdrift
-         * before Sentry so its plugins block is prepended after Sentry's apply
-         * statement and remains at the top, as required by Gradle.
-         */
-        [
-          '@bitdrift/react-native',
-          {
-            networkInstrumentation: true,
-          },
-        ],
-        ...(USE_SENTRY
-          ? [
-              /** @type {[string, any]} */ ([
-                '@sentry/react-native/expo',
-                {
-                  organization: 'blueskyweb',
-                  project: 'app',
-                  url: 'https://sentry.io',
-                  experimental_android: {
-                    enableAndroidGradlePlugin: true,
-                  },
-                },
-              ]),
-            ]
-          : []),
         [
           'expo-build-properties',
           {
@@ -337,7 +270,7 @@ module.exports = function (_config) {
           'expo-notifications',
           {
             icon: './assets/icon-android-notification.png',
-            color: '#1185fe',
+            color: '#2B7AC9',
             sounds: PLATFORM === 'ios' ? ['assets/dm.aiff'] : ['assets/dm.mp3'],
           },
         ],
@@ -469,7 +402,7 @@ module.exports = function (_config) {
           'expo-contacts',
           {
             contactsPermission:
-              'I agree to allow Bluesky to use my contacts for friend discovery until I opt out.',
+              'I agree to allow Overcast to use my contacts for friend discovery until I opt out.',
           },
         ],
       ],
@@ -481,32 +414,33 @@ module.exports = function (_config) {
                 appExtensions: [
                   {
                     targetName: 'Share-with-Bluesky',
-                    bundleIdentifier: 'xyz.blueskyweb.app.Share-with-Bluesky',
+                    bundleIdentifier:
+                      'com.neondrifter.overcast.Share-with-Bluesky',
                     entitlements: {
                       'com.apple.security.application-groups': [
-                        'group.app.bsky',
+                        'group.com.neondrifter.overcast',
                       ],
                     },
                   },
                   {
                     targetName: 'BlueskyNSE',
-                    bundleIdentifier: 'xyz.blueskyweb.app.BlueskyNSE',
+                    bundleIdentifier: 'com.neondrifter.overcast.BlueskyNSE',
                     entitlements: {
                       'com.apple.security.application-groups': [
-                        'group.app.bsky',
+                        'group.com.neondrifter.overcast',
                       ],
                     },
                   },
                   {
                     targetName: 'BlueskyClip',
-                    bundleIdentifier: 'xyz.blueskyweb.app.AppClip',
-                    parentBundleIdentifier: 'xyz.blueskyweb.app',
+                    bundleIdentifier: 'com.neondrifter.overcast.AppClip',
+                    parentBundleIdentifier: 'com.neondrifter.overcast',
                     entitlements: {
                       'com.apple.security.application-groups': [
-                        'group.app.bsky',
+                        'group.com.neondrifter.overcast',
                       ],
                       'com.apple.developer.parent-application-identifiers': [
-                        '$(AppIdentifierPrefix)xyz.blueskyweb.app',
+                        '$(AppIdentifierPrefix)com.neondrifter.overcast',
                       ],
                       'com.apple.developer.associated-domains':
                         ASSOCIATED_DOMAINS,
@@ -516,12 +450,10 @@ module.exports = function (_config) {
               },
             },
           },
-          projectId: '55bd077a-d905-4184-9c7f-94789ba0f302',
         },
       },
       experiments: {
         baseUrl: '/static',
-        buildCacheProvider: 'eas',
       },
     },
   }
