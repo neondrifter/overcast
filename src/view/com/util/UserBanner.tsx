@@ -1,5 +1,13 @@
 import {useCallback, useState} from 'react'
 import {Pressable, StyleSheet, View} from 'react-native'
+import Svg, {
+  Circle,
+  Defs,
+  LinearGradient,
+  Path,
+  Rect,
+  Stop,
+} from 'react-native-svg'
 import {Image} from 'expo-image'
 import {type ModerationUI} from '@bsky/sdk/moderation'
 import {msg} from '@lingui/core/macro'
@@ -21,6 +29,7 @@ import {
   compressImage,
   createComposerImage,
 } from '#/state/gallery'
+import {useHideProfileMediaEnabled} from '#/state/preferences'
 import {EditImageDialog} from '#/view/com/composer/photos/EditImageDialog'
 import {EventStopper} from '#/view/com/util/EventStopper'
 import {atoms as a, tokens, useTheme} from '#/alf'
@@ -48,6 +57,7 @@ export function UserBanner({
 }) {
   const t = useTheme()
   const {_} = useLingui()
+  const hideProfileMedia = useHideProfileMediaEnabled()
   const {requestCameraAccessIfNeeded} = useCameraPermission()
   const {requestPhotoAccessIfNeeded} = usePhotoLibraryPermission()
   const sheetWrapper = useSheetWrapper()
@@ -218,6 +228,8 @@ export function UserBanner({
         aspectRatio={3}
       />
     </>
+  ) : hideProfileMedia ? (
+    <OvercastBanner />
   ) : banner &&
     !(moderation?.blur && IS_ANDROID /* android crashes with blur */) ? (
     <Image
@@ -236,6 +248,80 @@ export function UserBanner({
         type === 'labeler' ? styles.labelerBanner : t.atoms.bg_contrast_25,
       ]}
     />
+  )
+}
+
+function OvercastBanner() {
+  const t = useTheme()
+  const isDark = t.name !== 'light'
+  const skyTopColor = isDark ? '#142942' : '#7DB5E8'
+  const skyBottomColor = isDark ? '#1E344D' : '#D6E6F5'
+  const sunbreakColor = isDark ? '#3B82CE' : '#B8DDFB'
+  const upperCloudColor = isDark ? '#1B3A5C' : '#95C1EA'
+  const midCloudColor = isDark ? '#27476B' : '#BFD6EC'
+  const lowerCloudColor = isDark ? t.palette.contrast_200 : '#DCE6F2'
+  const frontMistColor = isDark ? t.palette.contrast_100 : '#F0F4F9'
+
+  return (
+    <View
+      testID="userBannerOvercast"
+      style={[
+        styles.bannerImage,
+        a.overflow_hidden,
+        {backgroundColor: skyBottomColor},
+      ]}>
+      <Svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 600 150"
+        preserveAspectRatio="none"
+        fill="none">
+        <Defs>
+          <LinearGradient id="overcastBannerSky" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={skyTopColor} stopOpacity="1" />
+            <Stop offset="1" stopColor={skyBottomColor} stopOpacity="1" />
+          </LinearGradient>
+        </Defs>
+        <Rect width="600" height="150" fill="url(#overcastBannerSky)" />
+        {/* Soft sky-blue sunbreak glow */}
+        <Circle
+          cx="430"
+          cy="42"
+          r="75"
+          fill={sunbreakColor}
+          fillOpacity={isDark ? 0.22 : 0.45}
+        />
+        {/* Upper cerulean-slate overcast canopy */}
+        <Path
+          fill={upperCloudColor}
+          d="M0 0h600v52c-38 22-94 30-148 16-42 28-108 36-168 14-48 24-116 28-174 6C72 104 30 96 0 78V0Z"
+        />
+        {/* Drifting mid-sky cloud bank (left to center) */}
+        <Path
+          fill={midCloudColor}
+          opacity={0.85}
+          d="M-20 42c34-18 82-12 112 14 32-20 80-16 112 8 36-12 78 4 94 32 18 32-12 62-56 60H-20V42Z"
+        />
+        {/* Drifting mid-sky cloud bank (right to center) */}
+        <Path
+          fill={midCloudColor}
+          opacity={0.8}
+          d="M620 36c-38-16-86-8-116 18-34-18-82-14-114 10-34-10-76 6-90 34-16 30 14 58 58 56h262V36Z"
+        />
+        {/* Rolling foreground cumulus clouds */}
+        <Path
+          fill={lowerCloudColor}
+          opacity={0.78}
+          d="M0 150h600v-36c-34-22-86-28-134-14-38-28-102-34-156-12-44-24-108-26-160-4-42-18-98-14-150 14v52Z"
+        />
+        {/* Soft horizon mist */}
+        <Path
+          fill={frontMistColor}
+          opacity={0.85}
+          d="M0 150h600v-18c-48-16-112-18-168-2-48-20-118-22-176-2-52-16-120-14-174 4-28-6-58-4-82 6v12Z"
+        />
+      </Svg>
+    </View>
   )
 }
 

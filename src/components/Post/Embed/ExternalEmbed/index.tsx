@@ -20,6 +20,7 @@ import {Link} from '#/components/Link'
 import {Text} from '#/components/Typography'
 import {IS_NATIVE} from '#/env'
 import {type app} from '#/lexicons'
+import {OvercastMediaHider} from '../OvercastMediaHider'
 import {ExternalGif} from './ExternalGif'
 import {ExternalPlayer} from './ExternalPlayer'
 import {GifEmbed} from './Gif'
@@ -74,13 +75,15 @@ export const ExternalEmbed = ({
     const parsedAlt = parseAltFromGIFDescription(link.description)
     return (
       <View style={style}>
-        <GifEmbed
-          params={embedPlayerParams}
-          thumb={link.thumb}
-          altText={parsedAlt.alt}
-          isPreferredAltText={parsedAlt.isPreferred}
-          hideAlt={hideAlt}
-        />
+        <OvercastMediaHider kind="gif">
+          <GifEmbed
+            params={embedPlayerParams}
+            thumb={link.thumb}
+            altText={parsedAlt.alt}
+            isPreferredAltText={parsedAlt.isPreferred}
+            hideAlt={hideAlt}
+          />
+        </OvercastMediaHider>
       </View>
     )
   }
@@ -110,23 +113,29 @@ export const ExternalEmbed = ({
               : t.atoms.border_contrast_low,
           ]}>
           {imageUri && !embedPlayerParams ? (
-            <Image
-              style={[a.aspect_card]}
-              source={{uri: imageUri}}
-              accessibilityIgnoresInvertColors
-              loading="lazy"
-              useAppleWebpCodec
-            />
+            <OvercastMediaHider kind="thumbnail" rounded={false}>
+              <Image
+                style={[a.aspect_card]}
+                source={{uri: imageUri}}
+                accessibilityIgnoresInvertColors
+                loading="lazy"
+                useAppleWebpCodec
+              />
+            </OvercastMediaHider>
           ) : undefined}
 
           {embedPlayerParams?.isGif ? (
-            <ExternalGif link={link} params={embedPlayerParams} />
+            <OvercastMediaHider kind="gif" rounded={false}>
+              <ExternalGif link={link} params={embedPlayerParams} />
+            </OvercastMediaHider>
           ) : embedPlayerParams ? (
-            <ExternalPlayer
-              link={link}
-              params={embedPlayerParams}
-              post={post}
-            />
+            <OvercastMediaHider kind="video" rounded={false}>
+              <ExternalPlayer
+                link={link}
+                params={embedPlayerParams}
+                post={post}
+              />
+            </OvercastMediaHider>
           ) : undefined}
 
           <View

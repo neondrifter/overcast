@@ -135,6 +135,11 @@ const schema = z.object({
   pdsAddressHistory: z.array(z.string()).optional(),
   disableHaptics: z.boolean().optional(),
   disableAutoplay: z.boolean().optional(),
+  hideMedia: z.boolean().optional(),
+  hideProfileMedia: z.boolean().optional(),
+  mediaOverlayStyle: z
+    .enum(['clouds', 'autumn', 'christmas', 'lootbox'])
+    .optional(),
   kawaii: z.boolean().optional(),
   hasCheckedForStarterPack: z.boolean().optional(),
   subtitlesEnabled: z.boolean().optional(),
@@ -184,6 +189,9 @@ export const defaults: Schema = {
   pdsAddressHistory: [],
   disableHaptics: false,
   disableAutoplay: PlatformInfo.getIsReducedMotionEnabled(),
+  hideMedia: false,
+  hideProfileMedia: false,
+  mediaOverlayStyle: 'clouds',
   kawaii: false,
   hasCheckedForStarterPack: false,
   subtitlesEnabled: true,

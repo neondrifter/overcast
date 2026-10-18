@@ -18,6 +18,7 @@ import {Clock_Stroke2_Corner0_Rounded as Clock} from '#/components/icons/Clock'
 import {StandardSite} from '#/components/icons/community/StandardSite'
 import {Link} from '#/components/Link'
 import {MediaInsetBorder} from '#/components/MediaInsetBorder'
+import {OvercastMediaHider} from '#/components/Post/Embed/OvercastMediaHider'
 import {matchStandardSitePublisher} from '#/components/Post/Embed/StandardSiteEmbed/publishers'
 import {StandardSiteMetaRow} from '#/components/Post/Embed/StandardSiteEmbed/StandardSiteMetaRow'
 import {StandardSiteThemeProvider} from '#/components/Post/Embed/StandardSiteEmbed/StandardSiteThemeProvider'
@@ -173,13 +174,15 @@ export const StandardSiteEmbed = ({
               interacted ? t.atoms.bg_contrast_25 : pressed && t.atoms.bg,
             ]}>
             {imageUri ? (
-              <Image
-                style={[a.aspect_card]}
-                source={{uri: imageUri}}
-                accessibilityIgnoresInvertColors
-                loading="lazy"
-                useAppleWebpCodec
-              />
+              <OvercastMediaHider kind="thumbnail" rounded={false}>
+                <Image
+                  style={[a.aspect_card]}
+                  source={{uri: imageUri}}
+                  accessibilityIgnoresInvertColors
+                  loading="lazy"
+                  useAppleWebpCodec
+                />
+              </OvercastMediaHider>
             ) : undefined}
 
             <View

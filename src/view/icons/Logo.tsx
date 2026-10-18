@@ -8,9 +8,7 @@ import Svg, {
   Stop,
   type SvgProps,
 } from 'react-native-svg'
-import {Image} from 'expo-image'
 
-import {useLogoVariant} from '#/view/icons/useLogoVariant'
 import {flatten, useTheme} from '#/alf'
 
 const ratio = 57 / 64
@@ -23,32 +21,15 @@ type Props = {
 
 export const Logo = forwardRef(function LogoImpl(props: Props, ref) {
   const t = useTheme()
-  const {allowVariants = true, fill, ...rest} = props
-  const gradient = fill === 'sky'
+  const {allowVariants: _allowVariants, fill, ...rest} = props
   const styles = flatten(props.style)
-  const _fill = gradient
-    ? 'url(#sky)'
+  const useBrandGradient = !fill || fill === 'sky'
+  const mainFill = useBrandGradient
+    ? 'url(#overcastMain)'
     : fill || styles?.color || t.palette.primary_500
+  const accentFill = useBrandGradient ? 'url(#overcastAccent)' : mainFill
   // @ts-expect-error it's fiiiiine
   const size = parseInt(rest.width || 32, 10)
-
-  const logoVariant = useLogoVariant(allowVariants)
-
-  if (logoVariant === 'kawaii') {
-    return (
-      <Image
-        source={
-          size > 100
-            ? require('../../../assets/kawaii.png')
-            : require('../../../assets/kawaii_smol.png')
-        }
-        accessibilityLabel="Bluesky"
-        accessibilityHint=""
-        accessibilityIgnoresInvertColors
-        style={[{height: size, aspectRatio: 1.4}]}
-      />
-    )
-  }
 
   return (
     <Svg
@@ -58,18 +39,40 @@ export const Logo = forwardRef(function LogoImpl(props: Props, ref) {
       viewBox="0 0 64 57"
       {...rest}
       style={[{width: size, height: size * ratio}, styles]}>
-      {gradient && (
+      {useBrandGradient && (
         <Defs>
-          <LinearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="#0A7AFF" stopOpacity="1" />
-            <Stop offset="1" stopColor="#59B9FF" stopOpacity="1" />
+          <LinearGradient id="overcastMain" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor="#2B7AC9" stopOpacity="1" />
+            <Stop offset="0.55" stopColor="#3B6E9C" stopOpacity="1" />
+            <Stop offset="1" stopColor="#526277" stopOpacity="1" />
+          </LinearGradient>
+          <LinearGradient id="overcastAccent" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor="#6BAEE7" stopOpacity="1" />
+            <Stop offset="1" stopColor="#2B7AC9" stopOpacity="1" />
           </LinearGradient>
         </Defs>
       )}
 
+      {/* Precision-offset upper-right sky-blue rain-crest & ferrule */}
       <Path
-        fill={_fill}
-        d="M13.873 3.805C21.21 9.332 29.103 20.537 32 26.55v15.882c0-.338-.13.044-.41.867-1.512 4.456-7.418 21.847-20.923 7.944-7.111-7.32-3.819-14.64 9.125-16.85-7.405 1.264-15.73-.825-18.014-9.015C1.12 23.022 0 8.51 0 6.55 0-3.268 8.579-.182 13.873 3.805ZM50.127 3.805C42.79 9.332 34.897 20.537 32 26.55v15.882c0-.338.13.044.41.867 1.512 4.456 7.418 21.847 20.923 7.944 7.111-7.32 3.819-14.64-9.125-16.85 7.405 1.264 15.73-.825 18.014-9.015C62.88 23.022 64 8.51 64 6.55c0-9.818-8.578-6.732-13.873-2.745Z"
+        fill={accentFill}
+        fillOpacity={useBrandGradient ? 0.95 : 0.55}
+        d="M32 1.2C33.2 1.2 34.2 2.2 34.2 3.4V5.2H29.8V3.4C29.8 2.2 30.8 1.2 32 1.2ZM36.2 6.2C47.8 7.5 57.5 14.9 61.2 25.4C58.1 23.3 53.9 23.0 50.4 24.8C46.2 15.8 41.5 9.6 36.2 6.2Z"
+      />
+
+      {/* Sculpted umbrella canopy with negative-space S-curve rib channel */}
+      <Path
+        fill={mainFill}
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M32 6.8C48.8 6.8 62 19.6 62 34.8C62 35.8 61.0 36.5 60.1 36.0C57.6 34.2 54.6 33.4 51.8 33.4C49.0 33.4 46.2 34.3 43.8 36.0C43.1 36.5 42.1 36.5 41.4 36.0C38.8 34.2 35.4 33.4 32 33.4C28.6 33.4 25.2 34.2 22.6 36.0C21.9 36.5 20.9 36.5 20.2 36.0C17.8 34.3 15.0 33.4 12.2 33.4C9.4 33.4 6.4 34.2 3.9 36.0C3.0 36.5 2 35.8 2 34.8C2 19.6 15.2 6.8 32 6.8ZM13.5 25.2C18.8 25.2 23.2 21.4 29.5 21.4C35.8 21.4 40.2 25.2 46.5 25.2H51.2C52.2 25.2 53.0 26.0 53.0 27.0C53.0 28.0 52.2 28.8 51.2 28.8H46.5C39.2 28.8 34.8 25.0 29.5 25.0C24.2 25.0 19.8 28.8 13.5 28.8C12.5 28.8 11.7 28.0 11.7 27.0C11.7 26.0 12.5 25.2 13.5 25.2Z"
+      />
+
+      {/* Sculpted J-hook umbrella handle & mist droplet accent */}
+      <Path
+        fill={accentFill}
+        fillOpacity={useBrandGradient ? 0.9 : 0.7}
+        d="M29.8 33.2H34.2V46.2C34.2 51.5 29.9 55.5 24.6 55.5C19.3 55.5 15.2 51.5 15.2 46.4C15.2 45.2 16.2 44.2 17.4 44.2C18.6 44.2 19.6 45.2 19.6 46.4C19.6 49.1 21.8 51.1 24.6 51.1C27.4 51.1 29.8 49.1 29.8 46.2V33.2ZM41.5 48.2H49.5C50.7 48.2 51.7 49.2 51.7 50.4C51.7 51.6 50.7 52.6 49.5 52.6H41.5C40.3 52.6 39.3 51.6 39.3 50.4C39.3 49.2 40.3 48.2 41.5 48.2Z"
       />
     </Svg>
   )

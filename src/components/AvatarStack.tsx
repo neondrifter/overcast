@@ -69,6 +69,7 @@ export function AvatarStack({
             <UserAvatar
               size={size - borderWidth * 2}
               avatar={item.profile.avatar}
+              fallbackName={item.profile.displayName || item.profile.handle}
               type={item.profile.associated?.labeler ? 'labeler' : 'user'}
               moderation={item.moderation.ui('avatar')}
             />

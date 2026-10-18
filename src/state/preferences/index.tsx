@@ -3,6 +3,7 @@ import {Provider as AutoplayProvider} from './autoplay'
 import {Provider as DisableHapticsProvider} from './disable-haptics'
 import {Provider as ExternalEmbedsProvider} from './external-embeds-prefs'
 import {Provider as HiddenPostsProvider} from './hidden-posts'
+import {Provider as HideMediaProvider} from './hide-media'
 import {Provider as InAppBrowserProvider} from './in-app-browser'
 import {Provider as KawaiiProvider} from './kawaii'
 import {Provider as LanguagesProvider} from './languages'
@@ -22,6 +23,15 @@ export {
   useSetExternalEmbedPref,
 } from './external-embeds-prefs'
 export {useHiddenPosts, useHiddenPostsApi} from './hidden-posts'
+export {
+  type MediaOverlayStyle,
+  useHideMediaEnabled,
+  useHideProfileMediaEnabled,
+  useMediaOverlayStyle,
+  useSetHideMediaEnabled,
+  useSetHideProfileMediaEnabled,
+  useSetMediaOverlayStyle,
+} from './hide-media'
 export {useLabelDefinitions} from './label-defs'
 export {useLanguagePrefs, useLanguagePrefsApi} from './languages'
 export {useSetSubtitlesEnabled, useSubtitlesEnabled} from './subtitles'
@@ -36,13 +46,15 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
               <InAppBrowserProvider>
                 <DisableHapticsProvider>
                   <AutoplayProvider>
-                    <UsedStarterPacksProvider>
-                      <SubtitlesProvider>
-                        <TrendingSettingsProvider>
-                          <KawaiiProvider>{children}</KawaiiProvider>
-                        </TrendingSettingsProvider>
-                      </SubtitlesProvider>
-                    </UsedStarterPacksProvider>
+                    <HideMediaProvider>
+                      <UsedStarterPacksProvider>
+                        <SubtitlesProvider>
+                          <TrendingSettingsProvider>
+                            <KawaiiProvider>{children}</KawaiiProvider>
+                          </TrendingSettingsProvider>
+                        </SubtitlesProvider>
+                      </UsedStarterPacksProvider>
+                    </HideMediaProvider>
                   </AutoplayProvider>
                 </DisableHapticsProvider>
               </InAppBrowserProvider>

@@ -14,6 +14,7 @@ import {BACK_HITSLOP} from '#/lib/constants'
 import {useHaptics} from '#/lib/haptics'
 import {type NavigationProp} from '#/lib/routes/types'
 import {type Shadow} from '#/state/cache/types'
+import {useHideProfileMediaEnabled} from '#/state/preferences'
 import {useSession} from '#/state/session'
 import {LoadingPlaceholder} from '#/view/com/util/LoadingPlaceholder'
 import {UserAvatar} from '#/view/com/util/UserAvatar'
@@ -59,6 +60,7 @@ let ProfileHeaderShell = ({
   const {top: topInset} = useSafeAreaInsets()
   const haptics = useHaptics()
   const liveStatusControl = useDialogControl()
+  const hideProfileMedia = useHideProfileMediaEnabled()
 
   const aviRef = useAnimatedRef()
   const bannerRef = useAnimatedRef()
@@ -124,7 +126,7 @@ let ProfileHeaderShell = ({
       haptics.tap()
       ax.metric('live:card:open', {subject: profile.did, from: 'profile'})
       liveStatusControl.open()
-    } else {
+    } else if (!hideProfileMedia) {
       const modui = moderation.ui('avatar')
       const avatar = profile.avatar
       const type = profile.associated?.labeler ? 'rect-avi' : 'circle-avi'
@@ -141,15 +143,17 @@ let ProfileHeaderShell = ({
     liveStatusControl,
     live,
     haptics,
+    hideProfileMedia,
   ])
 
   const onPressBanner = useCallback(() => {
+    if (hideProfileMedia) return
     const modui = moderation.ui('banner')
     const banner = profile.banner
     if (banner && !(modui.blur && modui.noOverride)) {
       _openLightbox(banner, bannerRef, 'image')
     }
-  }, [profile.banner, moderation, _openLightbox, bannerRef])
+  }, [profile.banner, moderation, _openLightbox, bannerRef, hideProfileMedia])
 
   return (
     <View style={t.atoms.bg} pointerEvents={IS_IOS ? 'auto' : 'box-none'}>
@@ -164,7 +168,9 @@ let ProfileHeaderShell = ({
               ? l`View profile banner`
               : l`Profile banner placeholder`
           }
-          onPress={isPlaceholderProfile ? undefined : onPressBanner}
+          onPress={
+            isPlaceholderProfile || hideProfileMedia ? undefined : onPressBanner
+          }
           bannerRef={bannerRef}
           backButton={
             !hideBackButton && (
@@ -276,6 +282,7 @@ let ProfileHeaderShell = ({
                 type={profile.associated?.labeler ? 'labeler' : 'user'}
                 size={live.isActive ? 88 : 90}
                 avatar={profile.avatar}
+                fallbackName={profile.displayName || profile.handle}
                 moderation={moderation.ui('avatar')}
                 noBorder
               />
